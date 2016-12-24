@@ -23,11 +23,12 @@
 #include "../../src/environment/ale_state.hpp"
 #include "SearchTree.hpp"
 #include <fstream>
-
+//#include "../common/Parameters.hpp"
+class Parameters;
 
 class SearchAgent : public PlayerAgent {
     public:
-	SearchAgent(OSystem * _osystem, RomSettings * _settings, StellaEnvironment* _env, bool player_B = false);
+	SearchAgent(OSystem * _osystem, RomSettings * _settings, StellaEnvironment* _env, bool player_B = false, Parameters* param = nullptr);
         virtual ~SearchAgent();
 		
         /* *********************************************************************
@@ -42,6 +43,8 @@ class SearchAgent : public PlayerAgent {
         void saveUsedAction(int frame_number, Action action);
 
         std::vector<std::vector<bool>> getUsefulActionSequenceSet();
+
+        void set_sim_steps_per_node(int sim_steps);
 
 	protected:
         /* *********************************************************************

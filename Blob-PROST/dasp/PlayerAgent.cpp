@@ -213,11 +213,13 @@ bool PlayerAgent::has_terminated() {
  ******************************************************************** */
 PlayerAgent* PlayerAgent::generate_agent_instance(OSystem* _osystem,
 		RomSettings * _settings, StellaEnvironment* _env, bool player_B) {
+	assert(false);
 	std::string player_agent = _osystem->settings().getString("player_agent");
 	PlayerAgent* new_agent = NULL;
 
 	if (player_agent == "search_agent")
-		new_agent = new SearchAgent(_osystem, _settings, _env, player_B);
+		assert(false);
+//		new_agent = new SearchAgent(_osystem, _settings, _env, player_B, Parameters* param);
 //	else if (player_agent == "random_agent")
 //		new_agent = new RandomAgent(_osystem, _settings);
 //	else if (player_agent == "single_action_agent")

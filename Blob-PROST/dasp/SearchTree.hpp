@@ -23,6 +23,7 @@
 #include "../../src/environment/ale_state.hpp"
 #include "../../src/environment/stella_environment.hpp"
 #include "../../src/emucore/Settings.hxx"
+//#include "../common/Parameters.hpp"
 #include <fstream>
 #include <limits>
 #include <vector>
@@ -31,6 +32,7 @@
 
 class SearchAgent;
 class ActionSequenceDetection;
+class Parameters;
 
 class SearchTree {
 	/* *************************************************************************
@@ -42,7 +44,7 @@ public:
 	 Constructor
 	 ******************************************************************* */
 	SearchTree(RomSettings *, Settings &, ActionVect &,
-			StellaEnvironment* _env);
+			StellaEnvironment* _env, Parameters* param);
 
 	/* *********************************************************************
 	 Destructor

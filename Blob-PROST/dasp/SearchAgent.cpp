@@ -30,14 +30,15 @@
 
 //#include "UCTSearchTree.hpp"
 #include "../../src/common/time.hxx"
-
+#include "../common/Parameters.hpp"
 //#include "Priorities.hpp"
 
 SearchAgent::SearchAgent(OSystem* _osystem, RomSettings* _settings,
-		StellaEnvironment* _env, bool player_B) :
+		StellaEnvironment* _env, bool player_B, Parameters* param) :
 		PlayerAgent(_osystem, _settings), m_curr_action(UNDEFINED), m_current_episode(
 				0) {
-	search_method = p_osystem->settings().getString("search_method", true);
+//	search_method = p_osystem->settings().getString("search_method", true);
+	search_method = param->getSearchMethod();
 
 //	if (player_B) {
 //		available_actions = _settings->getAllActions_B();
@@ -45,15 +46,11 @@ SearchAgent::SearchAgent(OSystem* _osystem, RomSettings* _settings,
 //				false);
 //	}
 
-	search_tree = new BreadthFirstSearch(_settings, _osystem->settings(),
-			available_actions, _env);
-	m_trace.open("brfs.search-agent.trace");
-
 	// Depending on the configuration, create a SearchTree of the requested type
-//	if (search_method == "brfs") {
-//		search_tree = new BreadthFirstSearch(_settings, _osystem->settings(),
-//				available_actions, _env);
-//		m_trace.open("brfs.search-agent.trace");
+	if (search_method == "brfs") {
+		search_tree = new BreadthFirstSearch(_settings, _osystem->settings(),
+				available_actions, _env, param);
+		m_trace.open("brfs.search-agent.trace");
 //	} else if (search_method == "ucs") {
 //		search_tree = new UniformCostSearch(_settings, _osystem->settings(),
 //				available_actions, _env);
@@ -85,10 +82,10 @@ SearchAgent::SearchAgent(OSystem* _osystem, RomSettings* _settings,
 //		search_tree = new UCTSearchTree(_settings, _osystem->settings(),
 //				available_actions, _env);
 //		m_trace.open("uct.search-agent.trace");
-//	} else {
-//		cerr << "Unknown search Method: " << search_method << endl;
-//		exit(-1);
-//	}
+	} else {
+		std::cerr << "Unknown search Method: " << search_method << std::endl;
+		exit(-1);
+	}
 	m_rom_settings = _settings;
 	m_env = _env;
 
@@ -96,7 +93,7 @@ SearchAgent::SearchAgent(OSystem* _osystem, RomSettings* _settings,
 
 	Settings &settings = _osystem->settings();
 	sim_steps_per_node = settings.getInt("sim_steps_per_node", true);
-
+//	sim_steps_per_node
 }
 
 SearchAgent::~SearchAgent() {
@@ -205,5 +202,10 @@ Action SearchAgent::episode_start(void) {
 }
 
 std::vector<std::vector<bool>> SearchAgent::getUsefulActionSequenceSet() {
-	search_tree->getUsefulActionSequenceSet();
+	return search_tree->getUsefulActionSequenceSet();
+}
+
+
+void SearchAgent::set_sim_steps_per_node(int sim_steps) {
+	sim_steps_per_node = sim_steps;
 }

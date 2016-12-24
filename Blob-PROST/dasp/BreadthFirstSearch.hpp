@@ -7,10 +7,12 @@
 
 #include "SearchTree.hpp"
 
+class Parameters;
+
 class BreadthFirstSearch : public SearchTree {
 	
 public:
-    	BreadthFirstSearch(RomSettings *, Settings &settings, ActionVect &actions, StellaEnvironment* _env);
+    	BreadthFirstSearch(RomSettings *, Settings &settings, ActionVect &actions, StellaEnvironment* _env, Parameters* param);
 
 	virtual ~BreadthFirstSearch();
 

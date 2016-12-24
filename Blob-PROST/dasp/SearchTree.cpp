@@ -19,20 +19,20 @@
 //#include <time.h>
 #include <chrono>
 #include "ActionSequenceDetection.hpp"
+#include "../common/Parameters.hpp"
 
 /* *********************************************************************
  Constructor
  ******************************************************************* */
 SearchTree::SearchTree(RomSettings * rom_settings, Settings & settings,
-		ActionVect &_actions, StellaEnvironment* _env) :
+		ActionVect &_actions, StellaEnvironment* _env, Parameters* param) :
 		is_built(false), p_root(NULL), ignore_duplicates(true), reward_magnitude(
 				0), m_rom_settings(rom_settings), available_actions(_actions), total_simulation_steps(
 				0) {
-
 	sim_steps_per_node = settings.getInt("sim_steps_per_node", true);
-	max_sim_steps_per_frame = settings.getInt("max_sim_steps_per_frame", false);
-	num_simulations_per_frame = settings.getInt("num_simulations_per_frame",
-			false);
+	max_sim_steps_per_frame = param->getStepsPerPlanning(); //settings.getInt("max_sim_steps_per_frame", false);
+//	num_simulations_per_frame = settings.getInt("num_simulations_per_frame",
+//			false);
 
 //    std::cout << "max_sim_steps_per_frame: "<< max_sim_steps_per_frame << std::endl;
 	assert(
@@ -65,7 +65,7 @@ SearchTree::SearchTree(RomSettings * rom_settings, Settings & settings,
 		junk_decision_frame = settings.getInt("junk_decision_frame", false);
 		junk_resurrection_frame = settings.getInt("junk_resurrection_frame",
 				false);
-		longest_junk_sequence = settings.getInt("longest_junk_sequence", false);
+		longest_junk_sequence = param->getDaspSequenceLength();//settings.getInt("longest_junk_sequence", false);
 
 		decision_frame_function = settings.getInt("decision_frame_function",
 				false);
@@ -88,6 +88,8 @@ SearchTree::SearchTree(RomSettings * rom_settings, Settings & settings,
 
 //		current_junk_length = 1;
 	}
+
+	printf("DASP params: %d %d %d\n", param->getPlanningEpisodes(), param->getStepsPerPlanning(), param->getDaspSequenceLength());
 
 
 	printf("MinimalActionSet= %lu\n",
@@ -481,5 +483,6 @@ int SearchTree::getDetectedUsedActionsSize (){
 }
 
 std::vector<std::vector<bool>> SearchTree::getUsefulActionSequenceSet() {
+	assert(asd != nullptr);
 	return asd->getActionSequenceSet();
 }

@@ -11,10 +11,11 @@
 #include <ale_interface.hpp>
 
 #include "SearchAgent.hpp"
+//#include "../common/Parameters.hpp"
 
 class Dasp {
 public:
-	Dasp(ALEInterface& ale);
+	Dasp(ALEInterface& ale, Parameters* param);
 	virtual ~Dasp();
 
 	// Parameters:
@@ -22,6 +23,7 @@ public:
 			int planning_episodes, int frames);
 
 private:
+	StellaEnvironment* m_env;
 	SearchAgent* search_agent;
 	ALEState init_state;
 	void run(int planning_episodes, int frames);

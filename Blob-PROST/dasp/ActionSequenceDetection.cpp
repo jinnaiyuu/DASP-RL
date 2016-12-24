@@ -114,12 +114,6 @@ std::vector<bool> ActionSequenceDetection::getUsefulActions(
 	return available;
 }
 
-// TODO: Implement seqLength 1 first
-/**
- * 1.
- *
- *
- */
 void ActionSequenceDetection::getJunkActionSequence(SearchTree* tree,
 		int seqLength) {
 	action_length = seqLength;
@@ -136,33 +130,33 @@ void ActionSequenceDetection::getJunkActionSequence(SearchTree* tree,
 //	action_permutation.clear();
 
 	if (usedActionSeqs.size() < seqLength) {
-//		assert(seqLength == usedActionSeqs.size() + 1);
+//		assert(seqLength >= usedActionSeqs.size() + 1);
+		int allocated = usedActionSeqs.size();
 		usedActionSeqs.resize(seqLength);
-		int size = t_size(seqLength);
-		usedActionSeqs[seqLength - 1].resize(size);
-		usedActionSeqs[seqLength - 1].assign(size, false);
+		for (int i = allocated; i < seqLength; ++i) {
+			int size = t_size(i + 1);
+			usedActionSeqs[i].resize(size);
+			usedActionSeqs[i].assign(size, false);
+		}
 	}
-
-	if (probablistic_action_selection) {
-		num_novel_node_by_action[0].push_back(std::vector<int>(t_size(1), 0));
-		num_duplicate_node_by_action[0].push_back(
-				std::vector<int>(t_size(1), 0));
-		num_novel_node_by_action[1].push_back(std::vector<int>(t_size(2), 0));
-		num_duplicate_node_by_action[1].push_back(
-				std::vector<int>(t_size(2), 0));
-	}
-
-	// TODO: length=2; or should we keep this to l=1?
-	VertexCover* dgraph = new VertexCover(t_size(1));
-	dominance_graph.push_back(dgraph);
-
-	TreeNode* root = tree->get_root();
-	searchNode(root, seqLength, usedActionSeqs[seqLength - 1]);
 
 //	return isSequenceUsed;
 
 	if (!probablistic_action_selection) {
+		// TODO: length=2; or should we keep this to l=1?
+		VertexCover* dgraph = new VertexCover(t_size(1));
+		dominance_graph.push_back(dgraph);
+
+		TreeNode* root = tree->get_root();
+		searchNode(root, seqLength, usedActionSeqs[seqLength - 1]);
+
 		std::vector<bool> minset = dominance_graph.back()->minimalActionSet();
+
+		printf("minset %d : usedSeqs %d\n",
+				std::count(minset.begin(), minset.end(), true),
+				std::count(usedActionSeqs[0].begin(), usedActionSeqs[0].end(),
+						true));
+
 		if (std::count(minset.begin(), minset.end(), true)
 				< std::count(usedActionSeqs[0].begin(), usedActionSeqs[0].end(),
 						true)) {
@@ -223,6 +217,24 @@ void ActionSequenceDetection::getJunkActionSequence(SearchTree* tree,
 		}
 		printf("\n");
 	} else {
+		if (probablistic_action_selection) {
+			num_novel_node_by_action[0].push_back(
+					std::vector<int>(t_size(1), 0));
+			num_duplicate_node_by_action[0].push_back(
+					std::vector<int>(t_size(1), 0));
+			num_novel_node_by_action[1].push_back(
+					std::vector<int>(t_size(2), 0));
+			num_duplicate_node_by_action[1].push_back(
+					std::vector<int>(t_size(2), 0));
+		}
+
+		// TODO: length=2; or should we keep this to l=1?
+		VertexCover* dgraph = new VertexCover(t_size(1));
+		dominance_graph.push_back(dgraph);
+
+		TreeNode* root = tree->get_root();
+		searchNode(root, seqLength, usedActionSeqs[seqLength - 1]);
+
 		std::vector<bool> minset = dominance_graph.back()->minimalActionSet();
 		qvalues_by_action[0] = getQvaluesOfAllSequences(1);
 		int numPruned = std::count_if(qvalues_by_action[0].begin(),
@@ -743,7 +755,8 @@ int ActionSequenceDetection::permutateToOriginalAction(int input,
 	return seqToInt(seq);
 }
 
-
 std::vector<std::vector<bool>> ActionSequenceDetection::getActionSequenceSet() {
+	assert(usedActionSeqs.size()>0);
+	printf("usedActionSeqs.size()=%lu\n",usedActionSeqs.size());
 	return usedActionSeqs;
 }

@@ -60,6 +60,12 @@ private:
     int randomNoOp;
     int noOpMax;
     
+    // Yuu Jinnai: parameters on DASP
+    int planning_episodes;
+    int steps_per_planning;
+    int dasp_sequence_length;
+    std::string search_method;
+
     std::mt19937 agentRand;
     
 	   /**
@@ -236,6 +242,12 @@ private:
     void setRandomNoOp(int a);
     void setNoOpMax(int a);
     
+    // YJ
+    void setPlanningEpisodes(int a);
+    void setStepsPerPlanning(int a);
+    void setDaspSequenceLength(int a);
+    void setSearchMethod(std::string a);
+
 public:
     /**
      * Constructor receiving the information passed as arguments in the command line.
@@ -379,4 +391,10 @@ public:
     std::mt19937* getRNG();
     int getRandomNoOp();
     int getNoOpMax();
+
+    // YJ
+    int getPlanningEpisodes();
+    int getStepsPerPlanning();
+    int getDaspSequenceLength();
+    std::string getSearchMethod();
 };

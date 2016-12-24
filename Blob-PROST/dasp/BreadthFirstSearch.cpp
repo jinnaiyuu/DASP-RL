@@ -2,15 +2,15 @@
 #include "SearchAgent.hpp"
 #include <queue>
 #include "ActionSequenceDetection.hpp"
-
+#include "../common/Parameters.hpp"
 /* *********************************************************************
    Constructor
    Generates a whole search tree from the current state, until 
    max_frame_num is reached.
    ******************************************************************* */
 BreadthFirstSearch::BreadthFirstSearch(RomSettings *rom_settings, Settings &settings,
-			       ActionVect &actions, StellaEnvironment* _env) :
-    SearchTree(rom_settings, settings, actions, _env) {
+			       ActionVect &actions, StellaEnvironment* _env, Parameters* param) :
+    SearchTree(rom_settings, settings, actions, _env, param) {
 }
 
 /* *********************************************************************
