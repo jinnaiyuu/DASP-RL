@@ -9,6 +9,7 @@
 #include <random>
 #endif
 
+#include <vector>
 #include "../../dasp/Dasp.hpp"
 
 RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed) {
@@ -28,12 +29,14 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed) {
 
 	//Get the number of effective actions:
 //    printf("minaction=%d\n",param->isMinimalAction());
-	if (param->isMinimalAction() == 1) {
+	if (param->isMinimalAction() == 0) {
+		printf("defaultaction\n");
+		actions = ale.getLegalActionSet();
+	} else if (param->isMinimalAction() == 1) {
 		printf("minimalaction\n");
 		actions = ale.getMinimalActionSet();
-	} else if (param->isMinimalAction() == 0) {
-		actions = ale.getLegalActionSet();
 	} else if (param->isMinimalAction() == 2) {
+		printf("dasp\n");
 		// DASP
 		Dasp* dasp = new Dasp(ale, param);
 		std::vector<std::vector<bool>> actionSeqSet =
@@ -58,6 +61,11 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed) {
 			printf("\n");
 
 		}
+	} else if (param->isMinimalAction() == -1) {
+		printf("extended action set\n");
+		ActionVect a = ale.getLegalActionSet();
+		actions = a;
+		actions.insert(actions.end(), a.begin(), a.end());
 	}
 
 	numActions = actions.size();

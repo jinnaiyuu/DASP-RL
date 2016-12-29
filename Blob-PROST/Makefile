@@ -20,7 +20,8 @@ OUT_FILE := learner
 LDFLAGS := -lale -lz -lm
 
 
-OBS := bin/mainBlobTime.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BlobTimeFeatures.o bin/RLLearner.o bin/SarsaLearner.o bin/Dasp.o bin/ActionSequenceDetection.o bin/BreadthFirstSearch.o bin/PlayerAgent.o bin/SearchAgent.o bin/SearchTree.o bin/TreeNode.o bin/VertexCover.o
+OBS := bin/mainBlobTime.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BlobTimeFeatures.o bin/RLLearner.o bin/SarsaLearner.o 
+DASPOBS := bin/ActionSequenceDetection.o bin/bit_array.o bin/BreadthFirstSearch.o bin/IW1Search.o bin/PlayerAgent.o bin/SearchAgent.o bin/SearchTree.o bin/TreeNode.o bin/VertexCover.o
 
 ifeq ($(strip $(USE_SDL)), 1)
   FLAGS +=  -D__USE_SDL `sdl-config --cflags --libs`
@@ -29,8 +30,8 @@ endif
 
 all: learnerBlobTime
 
-learnerBlobTime: bin/mainBlobTime.o bin/Mathematics.o bin/Parameters.o bin/Timer.o bin/Features.o bin/Background.o bin/BlobTimeFeatures.o bin/RLLearner.o bin/SarsaLearner.o bin/Dasp.o
-	$(CXX) $(FLAGS) $(OBS) -o learnerBlobTime $(LIBS)
+learnerBlobTime: $(OBS) bin/Dasp.o
+	$(CXX) $(FLAGS) $(OBS) $(DASPOBS) -o learnerBlobTime $(LIBS)
 
 bin/mainBlobTime.o: mainBlobTime.cpp
 	$(CXX) $(FLAGS) -c mainBlobTime.cpp -o bin/mainBlobTime.o $(LIBS)
@@ -60,14 +61,20 @@ bin/SarsaLearner.o: agents/rl/sarsa/SarsaLearner.cpp
 	$(CXX) $(FLAGS) -c agents/rl/sarsa/SarsaLearner.cpp -o bin/SarsaLearner.o $(LIBS)
 
 ### DASP
-bin/Dasp.o: dasp/Dasp.cpp bin/ActionSequenceDetection.o bin/BreadthFirstSearch.o bin/PlayerAgent.o bin/SearchAgent.o bin/SearchTree.o bin/TreeNode.o bin/VertexCover.o
+bin/Dasp.o: $(DASPOBS)
 	$(CXX) $(FLAGS) -c dasp/Dasp.cpp -o bin/Dasp.o $(LIBS)
 
 bin/ActionSequenceDetection.o: dasp/ActionSequenceDetection.cpp
 	$(CXX) $(FLAGS) -c dasp/ActionSequenceDetection.cpp -o bin/ActionSequenceDetection.o $(LIBS)
 
+bin/bit_array.o: dasp/bit_array.cxx
+	$(CXX) $(FLAGS) -c dasp/bit_array.cxx -o bin/bit_array.o $(LIBS)
+
 bin/BreadthFirstSearch.o: dasp/BreadthFirstSearch.cpp
 	$(CXX) $(FLAGS) -c dasp/BreadthFirstSearch.cpp -o bin/BreadthFirstSearch.o $(LIBS)
+
+bin/IW1Search.o: dasp/IW1Search.cpp
+	$(CXX) $(FLAGS) -c dasp/IW1Search.cpp -o bin/IW1Search.o $(LIBS)
 
 bin/PlayerAgent.o: dasp/PlayerAgent.cpp
 	$(CXX) $(FLAGS) -c dasp/PlayerAgent.cpp -o bin/PlayerAgent.o $(LIBS)

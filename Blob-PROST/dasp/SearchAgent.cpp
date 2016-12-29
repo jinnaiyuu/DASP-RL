@@ -22,7 +22,7 @@
 #include <sstream>
 
 #include "BreadthFirstSearch.hpp"
-//#include "IW1Search.hpp"
+#include "IW1Search.hpp"
 //#include "PIW1Search.hpp"
 
 //#include "UniformCostSearch.hpp"
@@ -57,20 +57,20 @@ SearchAgent::SearchAgent(OSystem* _osystem, RomSettings* _settings,
 //
 //		m_trace.open("ucs.search-agent.trace");
 //
-//	} else if (search_method == "iw1") {
-//		search_tree = new IW1Search(_settings, _osystem->settings(),
-//				available_actions, _env);
-//
-//		search_tree->set_novelty_pruning();
-//		m_trace.open("iw1.search-agent.trace");
-//
+	} else if (search_method == "iw1") {
+		search_tree = new IW1Search(_settings, _osystem->settings(),
+				available_actions, _env, param);
+
+		search_tree->set_novelty_pruning();
+		m_trace.open("iw1.search-agent.trace");
+
 //	} else if (search_method == "piw1") {
 //		search_tree = new PIW1Search(_settings, _osystem->settings(),
 //				available_actions, _env);
 //
 //		search_tree->set_novelty_pruning();
 //		m_trace.open("piw1.search-agent.trace");
-//
+
 //	} else if (search_method == "bfs") {
 //		search_tree = new BestFirstSearch(_settings, _osystem->settings(),
 //				available_actions, _env);

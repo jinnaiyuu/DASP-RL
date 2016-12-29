@@ -486,3 +486,20 @@ std::vector<std::vector<bool>> SearchTree::getUsefulActionSequenceSet() {
 	assert(asd != nullptr);
 	return asd->getActionSequenceSet();
 }
+
+
+const ALERAM SearchTree::getRAM(ALEState& s) const {
+	ALEState restore = m_env->cloneState();
+	m_env->setState(s);
+	ALERAM ram = m_env->getRAM();
+	m_env->restoreState(restore);
+	return ram;
+}
+
+const ALEScreen SearchTree::getScreen(ALEState& s) const {
+	ALEState restore = m_env->cloneState();
+	m_env->setState(s);
+	ALEScreen screen = m_env->getScreen();
+	m_env->restoreState(restore);
+	return screen;
+}

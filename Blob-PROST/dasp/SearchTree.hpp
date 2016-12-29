@@ -169,6 +169,9 @@ protected:
 
 protected:
 
+    const ALERAM getRAM(ALEState& s) const;
+    const ALEScreen getScreen(ALEState& s) const;
+
 	// Root of the SearchTree
 	TreeNode* p_root;
 	// Number of steps we will run the simulation in each search-tree node
