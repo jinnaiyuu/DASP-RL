@@ -66,6 +66,13 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed) {
 		ActionVect a = ale.getLegalActionSet();
 		actions = a;
 		actions.insert(actions.end(), a.begin(), a.end());
+	} else if (param->isMinimalAction() == -2) {
+		printf("extended action set (10 times bigger)\n");
+		ActionVect a = ale.getLegalActionSet();
+		actions = a;
+		for (int i = 1; i < 10; ++i){
+			actions.insert(actions.end(), a.begin(), a.end());
+		}
 	}
 
 	numActions = actions.size();

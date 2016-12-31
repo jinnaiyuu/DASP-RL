@@ -31,7 +31,7 @@ endif
 all: learnerBlobTime
 
 learnerBlobTime: $(OBS) bin/Dasp.o
-	$(CXX) $(FLAGS) $(OBS) $(DASPOBS) -o learnerBlobTime $(LIBS)
+	$(CXX) $(FLAGS) $(OBS) bin/Dasp.o $(DASPOBS) -o learnerBlobTime $(LIBS)
 
 bin/mainBlobTime.o: mainBlobTime.cpp
 	$(CXX) $(FLAGS) -c mainBlobTime.cpp -o bin/mainBlobTime.o $(LIBS)
