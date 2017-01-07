@@ -7,11 +7,13 @@
 
 #ifndef BLOB_PROST_DASP_ACTIONPRIOR_HPP_
 #define BLOB_PROST_DASP_ACTIONPRIOR_HPP_
-#include <ale_interface.hpp>
+#include "../../src/ale_interface.hpp"
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 #include "../common/Parameters.hpp"
 #endif
+#include "Dasp.hpp"
+#include "TriggerStrategy.hpp"
 
 class ActionPrior {
 public:
@@ -19,14 +21,18 @@ public:
 	virtual ~ActionPrior();
 
 	std::vector<double> initialPruning();
-	std::vector<double> adaptivePruning(); // TODO: what to put in as arguments?
-
+	std::vector<double> adaptivePruning(std::vector<ALEState> trajectory,
+			double reward); // TODO: what to put in as arguments?
 
 private:
-	std::vector<double> runPruning(ALEState initState);
+	std::vector<double> runPruning(ALEState initState, std::string strategy);
+	std::vector<double> runDasp(ALEState initState);
+	bool needAdaptivePruning(double reward);
+	ALEState selectInitState(std::vector<ALEState> trajectory);
+
+	void printStrategies();
+
 	std::vector<double> currentPrior;
-	bool needAdaptivePruning();
-	ALEState selectInitState();
 
 	ALEInterface& ale;
 	Parameters* param;
@@ -37,9 +43,13 @@ private:
 	std::string initStateStrategy;
 
 	// DASP/DASA parameters
-    int planning_episodes;
-    int steps_per_planning;
-    std::string search_method;
+	Dasp* dasp;
+	int planning_episodes;
+	int steps_per_planning;
+	std::string search_method;
+
+	// Trigger parameter
+	TriggerStrategy* trigger;
 };
 
 #endif /* BLOB_PROST_DASP_ACTIONPRIOR_HPP_ */

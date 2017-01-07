@@ -8,7 +8,7 @@
 #ifndef BLOB_PROST_DASP_DASP_HPP_
 #define BLOB_PROST_DASP_DASP_HPP_
 
-#include <ale_interface.hpp>
+#include "../../src/ale_interface.hpp"
 
 #include "SearchAgent.hpp"
 //#include "../common/Parameters.hpp"

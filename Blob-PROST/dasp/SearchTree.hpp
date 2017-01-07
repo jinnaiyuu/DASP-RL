@@ -17,7 +17,7 @@
 #define __SEARCH_TREE_HPP__
 
 #include <queue>
-#include "./../src/common/Constants.h"
+#include "../../src/common/Constants.h"
 #include "TreeNode.hpp"
 #include "../../src/games/RomSettings.hpp"
 #include "../../src/environment/ale_state.hpp"

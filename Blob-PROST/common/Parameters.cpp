@@ -279,6 +279,9 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName) {
 	this->setSearchMethod(parameters["SEARCH_METHOD"]);
 	this->setDaspSequenceLength(
 			atoi(parameters["DASP_SEQUENCE_LENGTH"].c_str()));
+	if (triggerStrategy == "EPISODE_COUNT") {
+		this->setEpisodeCount(atoi(parameters["EPISODE_COUNT"].c_str()));
+	}
 //	}
 
 //    }
@@ -669,4 +672,12 @@ int Parameters::getDaspSequenceLength() {
 }
 std::string Parameters::getSearchMethod() {
 	return search_method;
+}
+
+int Parameters::getEpisodeCount() const {
+	return episodeCount;
+}
+
+void Parameters::setEpisodeCount(int episodeCount) {
+	this->episodeCount = episodeCount;
 }

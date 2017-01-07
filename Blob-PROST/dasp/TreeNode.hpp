@@ -16,7 +16,7 @@
 #ifndef __TREE_NODE_HPP__
 #define __TREE_NODE_HPP__
 
-#include "./../src/common/Constants.h"
+#include "../../src/common/Constants.h"
 #include "../../src/environment/ale_state.hpp"
 
 #include <vector>

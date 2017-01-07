@@ -73,6 +73,9 @@ private:
     int dasp_sequence_length;
     std::string search_method;
 
+    // YJ: parameters for Trigger strategy
+    int episodeCount;
+
     std::mt19937 agentRand;
     
 	   /**
@@ -418,4 +421,6 @@ public:
     int getStepsPerPlanning();
     int getDaspSequenceLength();
     std::string getSearchMethod();
+	int getEpisodeCount() const;
+	void setEpisodeCount(int episodeCount);
 };

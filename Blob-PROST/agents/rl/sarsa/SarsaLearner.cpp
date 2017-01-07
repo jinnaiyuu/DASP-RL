@@ -344,6 +344,9 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features) {
 		currentAction = epsilonGreedy(Q, episode);
 		gettimeofday(&tvBegin, NULL);
 		int lives = ale.lives();
+
+		vector<ALEState> trajectory;
+		trajectory.push_back(ale.cloneState());
 		//Repeat(for each step of episode) until game is over:
 		//This also stops when the maximum number of steps per episode is reached
 		while (!ale.game_over()) {
@@ -356,6 +359,7 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features) {
 			sanityCheck();
 			//Take action, observe reward and next state:
 			act(ale, currentAction, reward);
+			trajectory.push_back(ale.cloneState());
 			cumReward += reward[1];
 			if (!ale.game_over()) {
 				//Obtain active features in the new state:
@@ -391,11 +395,12 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features) {
 			trueFeatureSize = trueFnextSize;
 			currentAction = nextAction;
 
-			// YJ
-			if (useActionPrior) {
-				prior = actionPrior->adaptivePruning();
-			}
 		}
+		// YJ
+		if (useActionPrior) {
+			prior = actionPrior->adaptivePruning(trajectory, cumReward - prevCumReward);
+		}
+
 		gettimeofday(&tvEnd, NULL);
 		timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 		elapsedTime = double(tvDiff.tv_sec)

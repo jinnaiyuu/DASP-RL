@@ -22,6 +22,8 @@ LDFLAGS := -lale -lz -lm
 
 OBS := bin/mainBlobTime.o bin/Mathematics.o bin/Timer.o bin/Memory.o bin/Parameters.o bin/Features.o bin/Background.o bin/BlobTimeFeatures.o bin/RLLearner.o bin/SarsaLearner.o
 DASPOBS := bin/Dasp.o bin/ActionSequenceDetection.o bin/bit_array.o bin/BreadthFirstSearch.o bin/IW1Search.o bin/PlayerAgent.o bin/SearchAgent.o bin/SearchTree.o bin/TreeNode.o bin/VertexCover.o
+TRGOBS := bin/TriggerStrategy.o bin/EpisodeCount.o
+
 
 ifeq ($(strip $(USE_SDL)), 1)
   FLAGS +=  -D__USE_SDL `sdl-config --cflags --libs`
@@ -30,8 +32,8 @@ endif
 
 all: learnerBlobTime
 
-learnerBlobTime: $(OBS) bin/ActionPrior.o
-	$(CXX) $(FLAGS) $(OBS) bin/ActionPrior.o $(DASPOBS) -o learnerBlobTime $(LIBS)
+learnerBlobTime: $(OBS) bin/ActionPrior.o $(DASPOBS) $(TRGOBS)
+	$(CXX) $(FLAGS) $(OBS) bin/ActionPrior.o $(DASPOBS) $(TRGOBS) -o learnerBlobTime $(LIBS)
 
 bin/mainBlobTime.o: mainBlobTime.cpp
 	$(CXX) $(FLAGS) -c mainBlobTime.cpp -o bin/mainBlobTime.o $(LIBS)
@@ -63,10 +65,11 @@ bin/RLLearner.o: agents/rl/RLLearner.cpp
 bin/SarsaLearner.o: agents/rl/sarsa/SarsaLearner.cpp
 	$(CXX) $(FLAGS) -c agents/rl/sarsa/SarsaLearner.cpp -o bin/SarsaLearner.o $(LIBS)
 
-### DASP
-bin/ActionPrior.o: $(DASPOBS)
+### Action Prior
+bin/ActionPrior.o: $(DASPOBS) $(TRGOBS) dasp/ActionPrior.o
 	$(CXX) $(FLAGS) -c dasp/ActionPrior.cpp -o bin/ActionPrior.o $(LIBS)
 
+### DASPOBS: Pruning Strategy
 bin/Dasp.o: dasp/Dasp.cpp
 	$(CXX) $(FLAGS) -c dasp/Dasp.cpp -o bin/Dasp.o $(LIBS)
 
@@ -96,6 +99,15 @@ bin/TreeNode.o: dasp/TreeNode.cpp
 
 bin/VertexCover.o: dasp/VertexCover.cpp
 	$(CXX) $(FLAGS) -c dasp/VertexCover.cpp -o bin/VertexCover.o $(LIBS)
+
+### TRGOBS: Trigger Strategy
+bin/TriggerStrategy.o: dasp/TriggerStrategy.cpp
+	$(CXX) $(FLAGS) -c dasp/TriggerStrategy.cpp -o bin/TriggerStrategy.o $(LIBS)
+	
+bin/EpisodeCount.o: dasp/EpisodeCount.cpp
+	$(CXX) $(FLAGS) -c dasp/EpisodeCount.cpp -o bin/EpisodeCount.o $(LIBS)
+
+
 
 clean:
 	rm -rf ${OUT_FILE} bin/*.o
