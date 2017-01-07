@@ -20,8 +20,8 @@ OUT_FILE := learner
 LDFLAGS := -lale -lz -lm
 
 
-OBS := bin/mainBlobTime.o bin/Mathematics.o bin/Timer.o bin/Parameters.o bin/Features.o bin/Background.o bin/BlobTimeFeatures.o bin/RLLearner.o bin/SarsaLearner.o 
-DASPOBS := bin/ActionSequenceDetection.o bin/bit_array.o bin/BreadthFirstSearch.o bin/IW1Search.o bin/PlayerAgent.o bin/SearchAgent.o bin/SearchTree.o bin/TreeNode.o bin/VertexCover.o
+OBS := bin/mainBlobTime.o bin/Mathematics.o bin/Timer.o bin/Memory.o bin/Parameters.o bin/Features.o bin/Background.o bin/BlobTimeFeatures.o bin/RLLearner.o bin/SarsaLearner.o
+DASPOBS := bin/Dasp.o bin/ActionSequenceDetection.o bin/bit_array.o bin/BreadthFirstSearch.o bin/IW1Search.o bin/PlayerAgent.o bin/SearchAgent.o bin/SearchTree.o bin/TreeNode.o bin/VertexCover.o
 
 ifeq ($(strip $(USE_SDL)), 1)
   FLAGS +=  -D__USE_SDL `sdl-config --cflags --libs`
@@ -30,8 +30,8 @@ endif
 
 all: learnerBlobTime
 
-learnerBlobTime: $(OBS) bin/Dasp.o
-	$(CXX) $(FLAGS) $(OBS) bin/Dasp.o $(DASPOBS) -o learnerBlobTime $(LIBS)
+learnerBlobTime: $(OBS) bin/ActionPrior.o
+	$(CXX) $(FLAGS) $(OBS) bin/ActionPrior.o $(DASPOBS) -o learnerBlobTime $(LIBS)
 
 bin/mainBlobTime.o: mainBlobTime.cpp
 	$(CXX) $(FLAGS) -c mainBlobTime.cpp -o bin/mainBlobTime.o $(LIBS)
@@ -41,6 +41,9 @@ bin/Mathematics.o: common/Mathematics.cpp
 
 bin/Timer.o: common/Timer.cpp
 	$(CXX) $(FLAGS) -c common/Timer.cpp -o bin/Timer.o $(LIBS)
+
+bin/Memory.o: common/Memory.cpp
+	$(CXX) $(FLAGS) -c common/Memory.cpp -o bin/Memory.o $(LIBS)
 
 bin/Parameters.o: common/Parameters.cpp
 	$(CXX) $(FLAGS) -c common/Parameters.cpp -o bin/Parameters.o $(LIBS)
@@ -61,7 +64,10 @@ bin/SarsaLearner.o: agents/rl/sarsa/SarsaLearner.cpp
 	$(CXX) $(FLAGS) -c agents/rl/sarsa/SarsaLearner.cpp -o bin/SarsaLearner.o $(LIBS)
 
 ### DASP
-bin/Dasp.o: $(DASPOBS)
+bin/ActionPrior.o: $(DASPOBS)
+	$(CXX) $(FLAGS) -c dasp/ActionPrior.cpp -o bin/ActionPrior.o $(LIBS)
+
+bin/Dasp.o: dasp/Dasp.cpp
 	$(CXX) $(FLAGS) -c dasp/Dasp.cpp -o bin/Dasp.o $(LIBS)
 
 bin/ActionSequenceDetection.o: dasp/ActionSequenceDetection.cpp

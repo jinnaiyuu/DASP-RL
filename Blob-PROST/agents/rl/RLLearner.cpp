@@ -10,6 +10,7 @@
 #endif
 
 #include <vector>
+#include <numeric>
 #include "../../dasp/Dasp.hpp"
 
 RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed) {
@@ -19,6 +20,10 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed) {
 	finalEpsilon = param->getEpsilon();
 	toUseOnlyRewardSign = param->getUseRewardSign();
 	toBeOptimistic = param->getOptimisticInitialization();
+
+	if (toBeOptimistic == 1) {
+		printf("optimistic initial value\n");
+	}
 
 	episodeLength = param->getEpisodeLength();
 	numEpisodesEval = param->getNumEpisodesEval();
@@ -70,7 +75,7 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed) {
 		printf("extended action set (10 times bigger)\n");
 		ActionVect a = ale.getLegalActionSet();
 		actions = a;
-		for (int i = 1; i < 10; ++i){
+		for (int i = 1; i < 10; ++i) {
 			actions.insert(actions.end(), a.begin(), a.end());
 		}
 	}
@@ -78,41 +83,118 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed) {
 	numActions = actions.size();
 
 	printf("%d actions\n", numActions);
+
+	useActionPrior = param->getUseActionPrior();
+	// YJ Action prior
+
+	if (useActionPrior) {
+		printf("Use Action Prior\n");
+		actionPrior = new ActionPrior(ale, param);
+		prior = actionPrior->initialPruning();
+		printf("Initial prior: ");
+		for (int i = 0; i < prior.size(); ++i) {
+			printf("%.1f ", prior[i]);
+		}
+		printf("\n");
+	}
+
 	agentRand = param->getRNG();
 	agentRand->seed(seed);
 }
 
+// TODO: need to reformulate epsilonGreedy to take into account of Action Prior.
 int RLLearner::epsilonGreedy(vector<float> &QValues) {
 	randomActionTaken = 0;
 
-	int action = Mathematics::argmax(QValues, agentRand);
-	//With probability epsilon: a <- random action in A(s)
-	int random = (*agentRand)();
-	float epsilon = finalEpsilon;
-	if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
-		//if((rand()%int(1.0/epsilon)) == 0){
-		randomActionTaken = 1;
-		action = (*agentRand)() % numActions;
+	if (useActionPrior) {
+		vector<float> factoredQValues;
+		factoredQValues.resize(QValues.size());
+		for (int i = 0; i < factoredQValues.size(); ++i) {
+			factoredQValues[i] = prior[i] * QValues[i];
+		}
+		int action = Mathematics::argmax(factoredQValues, agentRand);
+		int random = (*agentRand)();
+		float epsilon = finalEpsilon;
+		if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
+			//if((rand()%int(1.0/epsilon)) == 0){
+			randomActionTaken = 1;
+			double d = (double) (*agentRand)() / RAND_MAX;
+			double sumOfWeights = std::accumulate(
+					factoredQValues.begin(), factoredQValues.end(), 0.0);
+			d = d * sumOfWeights;
+			double accum = 0.0;
+			for (int i = 0; i < factoredQValues.size(); ++i) {
+				accum += prior[i];
+				if (d < accum) {
+					action = i;
+					break;
+				}
+			}
+		}
+		return action;
+	} else {
+		int action = Mathematics::argmax(QValues, agentRand);
+		//With probability epsilon: a <- random action in A(s)
+		int random = (*agentRand)();
+		float epsilon = finalEpsilon;
+		if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
+			//if((rand()%int(1.0/epsilon)) == 0){
+			randomActionTaken = 1;
+			action = (*agentRand)() % numActions;
+		}
+		return action;
 	}
-	return action;
 }
 
 int RLLearner::epsilonGreedy(vector<float> &QValues, int episode) {
 	randomActionTaken = 0;
 
-	int action = Mathematics::argmax(QValues, agentRand);
-	//With probability epsilon: a <- random action in A(s)
-	int random = (*agentRand)();
-	float epsilon = finalEpsilon;
-	if (epsilonDecay && episode <= finalExplorationFrame) {
-		epsilon = 1 - (1 - finalEpsilon) * episode / finalExplorationFrame;
+	if (useActionPrior) {
+		vector<float> factoredQValues;
+		factoredQValues.resize(QValues.size());
+		for (int i = 0; i < factoredQValues.size(); ++i) {
+			factoredQValues[i] = prior[i] * QValues[i];
+		}
+		int action = Mathematics::argmax(factoredQValues, agentRand);
+
+		int random = (*agentRand)();
+		float epsilon = finalEpsilon;
+		if (epsilonDecay && episode <= finalExplorationFrame) {
+			epsilon = 1 - (1 - finalEpsilon) * episode / finalExplorationFrame;
+		}
+		if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
+			//if((rand()%int(1.0/epsilon)) == 0){
+			randomActionTaken = 1;
+			double d = (double) (*agentRand)() / RAND_MAX;
+			double sumOfWeights = std::accumulate(
+					factoredQValues.begin(), factoredQValues.end(), 0.0);
+			d = d * sumOfWeights;
+			double accum = 0.0;
+			for (int i = 0; i < factoredQValues.size(); ++i) {
+				accum += prior[i];
+				if (d < accum) {
+					action = i;
+					break;
+				}
+			}
+		}
+		return action;
+	} else {
+
+		int action = Mathematics::argmax(QValues, agentRand);
+		//With probability epsilon: a <- random action in A(s)
+		int random = (*agentRand)();
+		float epsilon = finalEpsilon;
+		if (epsilonDecay && episode <= finalExplorationFrame) {
+			epsilon = 1 - (1 - finalEpsilon) * episode / finalExplorationFrame;
+		}
+		if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
+			//if((rand()%int(1.0/epsilon)) == 0){
+			randomActionTaken = 1;
+			action = (*agentRand)() % numActions;
+		}
+		return action;
 	}
-	if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
-		//if((rand()%int(1.0/epsilon)) == 0){
-		randomActionTaken = 1;
-		action = (*agentRand)() % numActions;
-	}
-	return action;
 }
 
 /**

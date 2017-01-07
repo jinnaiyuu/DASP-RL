@@ -11,6 +11,7 @@
 #include "../Agent.hpp"
 #endif
 #include <random>
+#include "../../dasp/ActionPrior.hpp"
 using namespace std;
 
 class RLLearner : public Agent{
@@ -29,6 +30,10 @@ protected:
     int finalExplorationFrame;
     mt19937* agentRand;
     
+    bool useActionPrior;
+    ActionPrior* actionPrior;
+    std::vector<double> prior;
+
     /**
      * It acts in the environment and makes the proper operations in the reward signal (normalizing,
      * being optimistic, etc).

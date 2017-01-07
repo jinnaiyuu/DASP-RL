@@ -60,6 +60,13 @@ private:
     int randomNoOp;
     int noOpMax;
     
+    // Yuu Jinnai: parameters for Action Prior Strategies
+    int useActionPrior;
+	std::string initialStrategy;
+	std::string adaptiveStrategy;
+	std::string triggerStrategy;
+	std::string initStateStrategy;
+
     // Yuu Jinnai: parameters on DASP
     int planning_episodes;
     int steps_per_planning;
@@ -243,6 +250,13 @@ private:
     void setNoOpMax(int a);
     
     // YJ
+    void setUseActionPrior(int a);
+	void setInitialStrategy(std::string a);
+	void setAdaptiveStrategy(std::string a);
+	void setTriggerStrategy(std::string a);
+	void setInitStateStrategy(std::string a);
+
+	// YJ DASP parameters
     void setPlanningEpisodes(int a);
     void setStepsPerPlanning(int a);
     void setDaspSequenceLength(int a);
@@ -391,6 +405,13 @@ public:
     std::mt19937* getRNG();
     int getRandomNoOp();
     int getNoOpMax();
+
+    // YJ
+    int getUseActionPrior();
+	std::string getInitialStrategy();
+	std::string getAdaptiveStrategy();
+	std::string getTriggerStrategy();
+	std::string getInitStateStrategy();
 
     // YJ
     int getPlanningEpisodes();

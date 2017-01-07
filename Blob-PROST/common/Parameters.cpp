@@ -264,11 +264,23 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName) {
 
 	//YJ
 //    if (minimalAction >= 2){
+	this->setUseActionPrior(atoi(parameters["USE_ACTION_PRIOR"].c_str()));
+
+	if (useActionPrior) {
+		this->setInitialStrategy(parameters["INITIAL_STRATEGY"].c_str());
+		this->setAdaptiveStrategy(parameters["ADAPTIVE_STRATEGY"].c_str());
+		this->setTriggerStrategy(parameters["TRIGGER_STRATEGY"].c_str());
+		this->setInitStateStrategy(parameters["INITIAL_STATE_STRATEGY"].c_str());
+	}
+
+//	if (initialStrategy == "DASP" || adaptiveStrategy == "DASP") {
 	this->setPlanningEpisodes(atoi(parameters["PLANNING_EPISODES"].c_str()));
 	this->setStepsPerPlanning(atoi(parameters["STEPS_PER_PLANNING"].c_str()));
+	this->setSearchMethod(parameters["SEARCH_METHOD"]);
 	this->setDaspSequenceLength(
 			atoi(parameters["DASP_SEQUENCE_LENGTH"].c_str()));
-	this->setSearchMethod(parameters["SEARCH_METHOD"]);
+//	}
+
 //    }
 }
 
@@ -603,6 +615,37 @@ int Parameters::getNoOpMax() {
 }
 
 // YJ
+int Parameters::getUseActionPrior() {
+	return useActionPrior;
+}
+std::string Parameters::getInitialStrategy() {
+	return initialStrategy;
+}
+std::string Parameters::getAdaptiveStrategy() {
+	return adaptiveStrategy;
+}
+std::string Parameters::getTriggerStrategy() {
+	return triggerStrategy;
+}
+std::string Parameters::getInitStateStrategy() {
+	return initStateStrategy;
+}
+void Parameters::setUseActionPrior(int a) {
+	useActionPrior = a;
+}
+void Parameters::setInitialStrategy(std::string a) {
+	initialStrategy = a;
+}
+void Parameters::setAdaptiveStrategy(std::string a) {
+	adaptiveStrategy = a;
+}
+void Parameters::setTriggerStrategy(std::string a) {
+	triggerStrategy = a;
+}
+void Parameters::setInitStateStrategy(std::string a) {
+	initStateStrategy = a;
+}
+
 void Parameters::setPlanningEpisodes(int a) {
 	planning_episodes = a;
 }
