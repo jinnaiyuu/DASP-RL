@@ -224,7 +224,7 @@ protected:
 	int junk_resurrection_frame;
 	int longest_junk_sequence;
 	int decision_frame_function;
-
+	int screenDuplicate;
 	ActionSequenceDetection* asd;
 
 //	int current_junk_length;

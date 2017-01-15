@@ -7,7 +7,7 @@
 
 #include "Dasp.hpp"
 
-Dasp::Dasp(ALEInterface& ale, Parameters* param) {
+Dasp::Dasp(ALEInterface& ale, Parameters* param) : Prior() {
 	search_agent = new SearchAgent(ale.theOSystem.get(), ale.romSettings.get(),
 			ale.environment.get(), false, param);
 	m_env = ale.environment.get();
@@ -41,24 +41,33 @@ std::vector<std::vector<bool>> Dasp::getMinimalActionSequenceSet(
 
 void Dasp::run(int planning_episodes, int frames, ALEState initState) {
 	ALEState restore_state = m_env->cloneState();
-//	ALEState s = m_env->cloneState();
-//	state = m_env->cloneState();
-	// TODO: interface to change number of frames per planning dynamically
-	printf("eps=%d, frames=%d\n", planning_episodes, frames);
+	printf("frames=%d\n", frames);
 	search_agent->set_sim_steps_per_node(frames);
-	for (int i = 0; i < planning_episodes; i++) {
-		printf("planning episode %d\n", i);
-		m_env->setState(initState);
-		Action act = search_agent->agent_step();
-		for (int f = 0; f < 5; ++f) {
-			m_env->act(act, PLAYER_B_NOOP);
-		}
-		ALEState s = m_env->cloneState();
-		ALEState* p_s = new ALEState(s, s.serialize() );
-		search_agent->update_state(p_s);
-	}
+	m_env->setState(initState);
+	Action act = search_agent->agent_step();
 	m_env->restoreState(restore_state);
 }
+
+std::vector<double> Dasp::getPrior(ALEState initState, int steps_per_planning) {
+	std::vector<double> prior;
+	std::vector<std::vector<bool>> actionSeqSet =
+			getMinimalActionSequenceSet(1, 1,
+					steps_per_planning, initState);
+
+	assert(actionSeqSet.size() == 1);
+	for (int i = 0; i < actionSeqSet.size(); ++i) {
+		for (int j = 0; j < actionSeqSet[i].size(); ++j) {
+			if (actionSeqSet[i][j]) {
+				prior.push_back(1.0);
+			} else {
+				prior.push_back(0.0);
+			}
+		}
+	}
+	return prior;
+}
+
+
 
 bool Dasp::isDone(int planning_episodes) {
 //	return (frames < max_frames);

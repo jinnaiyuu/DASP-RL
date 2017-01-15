@@ -11,9 +11,10 @@
 #include "../../src/ale_interface.hpp"
 
 #include "SearchAgent.hpp"
-//#include "../common/Parameters.hpp"
+#include "Prior.hpp"
 
-class Dasp {
+
+class Dasp : public Prior {
 public:
 	Dasp(ALEInterface& ale, Parameters* param);
 //	Dasp(ALEInterface& ale, Parameters* param);
@@ -24,6 +25,7 @@ public:
 			int planning_episodes, int frames);
 	std::vector<std::vector<bool>> getMinimalActionSequenceSet(int sequence_length,
 			int planning_episodes, int frames, ALEState initState);
+	std::vector<double> getPrior(ALEState initState, int steps_per_planning);
 
 private:
 	StellaEnvironment* m_env;
@@ -34,6 +36,8 @@ private:
 	void episodeEnd();
 	void episodeStart(Action& action_a, Action& action_b);
 	void episodeStep(Action& action_a, Action& action_b);
+
+//	bool iterativeDeepening
 };
 
 #endif /* BLOB_PROST_DASP_DASP_HPP_ */

@@ -60,6 +60,11 @@ private:
     int randomNoOp;
     int noOpMax;
     
+    // YJ: RL methods
+    std::string actionSelectionStrategy;
+
+    float temperature; // For softmax function
+
     // Yuu Jinnai: parameters for Action Prior Strategies
     int useActionPrior;
 	std::string initialStrategy;
@@ -72,9 +77,17 @@ private:
     int steps_per_planning;
     int dasp_sequence_length;
     std::string search_method;
+    int screenDuplicate;
+
+    // YJ adaptive strategy
+    int adaptive_steps_per_planning;
 
     // YJ: parameters for Trigger strategy
     int episodeCount;
+
+    // YJ: parameters for init state strategy
+    int backCount;
+    int randomizeBackCount;
 
     std::mt19937 agentRand;
     
@@ -423,4 +436,16 @@ public:
     std::string getSearchMethod();
 	int getEpisodeCount() const;
 	void setEpisodeCount(int episodeCount);
+	int getAdaptiveStepsPerPlanning() const;
+	void setAdaptiveStepsPerPlanning(int adaptiveStepsPerPlanning);
+	int getBackCount() const;
+	void setBackCount(int backCount);
+	int getRandomizeBackCount() const;
+	void setRandomizeBackCount(int randomizeBackCount);
+	int getScreenDuplicate() const;
+	void setScreenDuplicate(int screenDuplicate);
+	const std::string& getActionSelectionStrategy() const;
+	void setActionSelectionStrategy(const std::string& actionSelectionStrategy);
+	float getTemperature() const;
+	void setTemperature(float temperature);
 };

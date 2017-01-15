@@ -11,8 +11,8 @@ USE_SDL     := 0
 # -D__USE_SDL Ensures we can use SDL to see the game screen
 # -D_GNU_SOURCE=1 means the compiler will use the GNU standard of compilation, the superset of all other standards under GNU C libraries.
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library. # 
-FLAGS := -O3
-#FLAGS := -g
+#FLAGS := -O3
+FLAGS := -O3 -g
 LIBS := -I$(ALE)/src -L$(ALE) -lale -lz
 CXX := g++ -std=c++11
 OUT_FILE := learner
@@ -21,9 +21,9 @@ LDFLAGS := -lale -lz -lm
 
 
 OBS := bin/mainBlobTime.o bin/Mathematics.o bin/Timer.o bin/Memory.o bin/Parameters.o bin/Features.o bin/Background.o bin/BlobTimeFeatures.o bin/RLLearner.o bin/SarsaLearner.o
-DASPOBS := bin/Dasp.o bin/ActionSequenceDetection.o bin/bit_array.o bin/BreadthFirstSearch.o bin/IW1Search.o bin/PlayerAgent.o bin/SearchAgent.o bin/SearchTree.o bin/TreeNode.o bin/VertexCover.o
+DASPOBS := bin/Prior.o bin/Dasp.o bin/ActionSequenceDetection.o bin/bit_array.o bin/BreadthFirstSearch.o bin/IW1Search.o bin/PlayerAgent.o bin/SearchAgent.o bin/SearchTree.o bin/TreeNode.o bin/VertexCover.o
 TRGOBS := bin/TriggerStrategy.o bin/EpisodeCount.o
-
+SLTOBS := bin/SelectInitState.o bin/BackCount.o
 
 ifeq ($(strip $(USE_SDL)), 1)
   FLAGS +=  -D__USE_SDL `sdl-config --cflags --libs`
@@ -32,8 +32,8 @@ endif
 
 all: learnerBlobTime
 
-learnerBlobTime: $(OBS) bin/ActionPrior.o $(DASPOBS) $(TRGOBS)
-	$(CXX) $(FLAGS) $(OBS) bin/ActionPrior.o $(DASPOBS) $(TRGOBS) -o learnerBlobTime $(LIBS)
+learnerBlobTime: $(OBS) bin/ActionPrior.o $(DASPOBS) $(TRGOBS) $(SLTOBS)
+	$(CXX) $(FLAGS) $(OBS) bin/ActionPrior.o $(DASPOBS) $(TRGOBS) $(SLTOBS) -o learnerBlobTime $(LIBS)
 
 bin/mainBlobTime.o: mainBlobTime.cpp
 	$(CXX) $(FLAGS) -c mainBlobTime.cpp -o bin/mainBlobTime.o $(LIBS)
@@ -66,10 +66,13 @@ bin/SarsaLearner.o: agents/rl/sarsa/SarsaLearner.cpp
 	$(CXX) $(FLAGS) -c agents/rl/sarsa/SarsaLearner.cpp -o bin/SarsaLearner.o $(LIBS)
 
 ### Action Prior
-bin/ActionPrior.o: $(DASPOBS) $(TRGOBS) dasp/ActionPrior.o
+bin/ActionPrior.o: $(DASPOBS) $(TRGOBS) $(SLTOBS) dasp/ActionPrior.o
 	$(CXX) $(FLAGS) -c dasp/ActionPrior.cpp -o bin/ActionPrior.o $(LIBS)
 
 ### DASPOBS: Pruning Strategy
+bin/Prior.o: dasp/Prior.cpp
+	$(CXX) $(FLAGS) -c dasp/Prior.cpp -o bin/Prior.o $(LIBS)
+
 bin/Dasp.o: dasp/Dasp.cpp
 	$(CXX) $(FLAGS) -c dasp/Dasp.cpp -o bin/Dasp.o $(LIBS)
 
@@ -106,6 +109,14 @@ bin/TriggerStrategy.o: dasp/TriggerStrategy.cpp
 	
 bin/EpisodeCount.o: dasp/EpisodeCount.cpp
 	$(CXX) $(FLAGS) -c dasp/EpisodeCount.cpp -o bin/EpisodeCount.o $(LIBS)
+
+### SLTOBS: Select init state strategy
+bin/SelectInitState.o: dasp/SelectInitState.cpp
+	$(CXX) $(FLAGS) -c dasp/SelectInitState.cpp -o bin/SelectInitState.o $(LIBS)
+
+bin/BackCount.o: dasp/BackCount.cpp
+	$(CXX) $(FLAGS) -c dasp/BackCount.cpp -o bin/BackCount.o $(LIBS)
+
 
 
 

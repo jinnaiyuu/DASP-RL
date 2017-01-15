@@ -16,6 +16,8 @@
 RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed) {
 	randomActionTaken = 0;
 
+	actionSelectionStrategy = param->getActionSelectionStrategy();
+
 	gamma = param->getGamma();
 	finalEpsilon = param->getEpsilon();
 	toUseOnlyRewardSign = param->getUseRewardSign();
@@ -87,6 +89,8 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed) {
 	useActionPrior = param->getUseActionPrior();
 	// YJ Action prior
 
+	temperature = param->getTemperature();
+
 	if (useActionPrior) {
 		printf("Use Action Prior\n");
 		actionPrior = new ActionPrior(ale, param);
@@ -102,99 +106,97 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed) {
 	agentRand->seed(seed);
 }
 
-// TODO: need to reformulate epsilonGreedy to take into account of Action Prior.
-int RLLearner::epsilonGreedy(vector<float> &QValues) {
-	randomActionTaken = 0;
-
-	if (useActionPrior) {
-		vector<float> factoredQValues;
-		factoredQValues.resize(QValues.size());
-		for (int i = 0; i < factoredQValues.size(); ++i) {
-			factoredQValues[i] = prior[i] * QValues[i];
-		}
-		int action = Mathematics::argmax(factoredQValues, agentRand);
-		int random = (*agentRand)();
-		float epsilon = finalEpsilon;
-		if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
-			//if((rand()%int(1.0/epsilon)) == 0){
-			randomActionTaken = 1;
-			double d = (double) (*agentRand)() / RAND_MAX;
-			double sumOfWeights = std::accumulate(
-					factoredQValues.begin(), factoredQValues.end(), 0.0);
-			d = d * sumOfWeights;
-			double accum = 0.0;
-			for (int i = 0; i < factoredQValues.size(); ++i) {
-				accum += prior[i];
-				if (d < accum) {
-					action = i;
-					break;
-				}
-			}
-		}
-		return action;
+int RLLearner::chooseAction(vector<float> &QValues, int episode) {
+	if (actionSelectionStrategy == "EPSILON_GREEDY") {
+		return epsilonGreedy(QValues, episode);
+	} else if (actionSelectionStrategy == "SOFTMAX") {
+		return softmax(QValues, episode);
 	} else {
-		int action = Mathematics::argmax(QValues, agentRand);
-		//With probability epsilon: a <- random action in A(s)
-		int random = (*agentRand)();
-		float epsilon = finalEpsilon;
-		if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
-			//if((rand()%int(1.0/epsilon)) == 0){
-			randomActionTaken = 1;
-			action = (*agentRand)() % numActions;
-		}
-		return action;
+		printf("chooseAction error: %s\n", actionSelectionStrategy.c_str());
+		return epsilonGreedy(QValues, episode);
 	}
 }
+
+//int RLLearner::epsilonGreedy(vector<float> &QValues) {
+//	randomActionTaken = 0;
+//
+//	if (useActionPrior) {
+//		vector<float> factoredQValues;
+//		factoredQValues.resize(QValues.size());
+//		for (int i = 0; i < factoredQValues.size(); ++i) {
+//			factoredQValues[i] = prior[i] * QValues[i];
+//		}
+//		int action = Mathematics::argmax(factoredQValues, agentRand);
+//		int random = (*agentRand)();
+//		float epsilon = finalEpsilon;
+//		if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
+//			//if((rand()%int(1.0/epsilon)) == 0){
+//			randomActionTaken = 1;
+//			action = Mathematics::chooseFromProbability(factoredQValues,
+//					agentRand);
+//		}
+//		return action;
+//	} else {
+//		int action = Mathematics::argmax(QValues, agentRand);
+//		//With probability epsilon: a <- random action in A(s)
+//		int random = (*agentRand)();
+//		float epsilon = finalEpsilon;
+//		if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
+//			//if((rand()%int(1.0/epsilon)) == 0){
+//			randomActionTaken = 1;
+//			action = (*agentRand)() % numActions;
+//		}
+//		return action;
+//	}
+//}
 
 int RLLearner::epsilonGreedy(vector<float> &QValues, int episode) {
 	randomActionTaken = 0;
 
+	vector<float> factoredQValues = QValues;
+
 	if (useActionPrior) {
-		vector<float> factoredQValues;
-		factoredQValues.resize(QValues.size());
 		for (int i = 0; i < factoredQValues.size(); ++i) {
-			factoredQValues[i] = prior[i] * QValues[i];
+			factoredQValues[i] *= prior[i];
 		}
-		int action = Mathematics::argmax(factoredQValues, agentRand);
+	}
 
-		int random = (*agentRand)();
-		float epsilon = finalEpsilon;
+	int action = Mathematics::argmax(factoredQValues, agentRand);
+
+	int random = (*agentRand)();
+	float epsilon = finalEpsilon;
+	if (episode != -1) {
 		if (epsilonDecay && episode <= finalExplorationFrame) {
 			epsilon = 1 - (1 - finalEpsilon) * episode / finalExplorationFrame;
 		}
-		if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
-			//if((rand()%int(1.0/epsilon)) == 0){
-			randomActionTaken = 1;
-			double d = (double) (*agentRand)() / RAND_MAX;
-			double sumOfWeights = std::accumulate(
-					factoredQValues.begin(), factoredQValues.end(), 0.0);
-			d = d * sumOfWeights;
-			double accum = 0.0;
-			for (int i = 0; i < factoredQValues.size(); ++i) {
-				accum += prior[i];
-				if (d < accum) {
-					action = i;
-					break;
-				}
-			}
-		}
-		return action;
-	} else {
+	}
 
-		int action = Mathematics::argmax(QValues, agentRand);
-		//With probability epsilon: a <- random action in A(s)
-		int random = (*agentRand)();
-		float epsilon = finalEpsilon;
-		if (epsilonDecay && episode <= finalExplorationFrame) {
-			epsilon = 1 - (1 - finalEpsilon) * episode / finalExplorationFrame;
-		}
-		if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
-			//if((rand()%int(1.0/epsilon)) == 0){
-			randomActionTaken = 1;
+	if ((random % int(nearbyint(1.0 / epsilon))) == 0) {
+		//if((rand()%int(1.0/epsilon)) == 0){
+		randomActionTaken = 1;
+		if (useActionPrior) {
+			action = Mathematics::chooseFromProbability(factoredQValues,
+					agentRand);
+		} else {
 			action = (*agentRand)() % numActions;
 		}
-		return action;
 	}
+	assert(0 <= action && action < numActions);
+	return action;
+
+}
+
+int RLLearner::softmax(vector<float> &QValues, int episode) {
+	vector<float> factoredQValues = QValues;
+
+	if (useActionPrior) {
+		for (int i = 0; i < factoredQValues.size(); ++i) {
+			factoredQValues[i] *= prior[i];
+		}
+	}
+
+	return Mathematics::softmax(factoredQValues, temperature, agentRand);
+
 }
 
 /**

@@ -341,7 +341,8 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features) {
 		groupFeatures(F);
 		updateQValues(F, Q);
 
-		currentAction = epsilonGreedy(Q, episode);
+		currentAction = chooseAction(Q, episode);
+//		currentAction = epsilonGreedy(Q, episode);
 		gettimeofday(&tvBegin, NULL);
 		int lives = ale.lives();
 
@@ -369,7 +370,8 @@ void SarsaLearner::learnPolicy(ALEInterface& ale, Features *features) {
 				trueFnextSize = Fnext.size();
 				groupFeatures(Fnext);
 				updateQValues(Fnext, Qnext); //Update Q-values for the new active features
-				nextAction = epsilonGreedy(Qnext, episode);
+				nextAction = chooseAction(Qnext, episode);
+//				nextAction = epsilonGreedy(Qnext, episode);
 			} else {
 				nextAction = 0;
 				for (unsigned int i = 0; i < Qnext.size(); i++) {
@@ -460,7 +462,8 @@ void SarsaLearner::evaluatePolicy(ALEInterface& ale, Features *features) {
 					F);
 			groupFeatures(F);
 			updateQValues(F, Q); //Update Q-values for each possible action
-			currentAction = epsilonGreedy(Q);
+			currentAction = chooseAction(Q, -1);
+//			currentAction = epsilonGreedy(Q);
 			//Take action, observe reward and next state:
 			reward = ale.act(actions[currentAction]);
 			cumReward += reward;

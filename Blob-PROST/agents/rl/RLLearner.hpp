@@ -18,6 +18,8 @@ class RLLearner : public Agent{
 protected:
     ActionVect actions;
     
+    std::string actionSelectionStrategy;
+
     float gamma, finalEpsilon;
     float firstReward;
     bool   sawFirstReward;
@@ -33,6 +35,8 @@ protected:
     bool useActionPrior;
     ActionPrior* actionPrior;
     std::vector<double> prior;
+
+    float temperature;
 
     /**
      * It acts in the environment and makes the proper operations in the reward signal (normalizing,
@@ -55,9 +59,13 @@ protected:
      *
      * @return int action to be taken
      */
-    int epsilonGreedy(vector<float> &QValues);
+    int chooseAction(vector<float> &QValues,int episode);
+
+//    int epsilonGreedy(vector<float> &QValues);
     int epsilonGreedy(vector<float> &QValues,int episode);
-    
+
+    int softmax(vector<float> &QValues, int episode);
+
     /**
      * Constructor to be used by the RL classes to save the parameters that
      * will be used by other methods.

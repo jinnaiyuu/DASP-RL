@@ -91,6 +91,12 @@ SearchTree::SearchTree(RomSettings * rom_settings, Settings & settings,
 
 	printf("DASP params: %d %d %d\n", param->getPlanningEpisodes(), param->getStepsPerPlanning(), param->getDaspSequenceLength());
 
+	int screenDuplicate =param->getScreenDuplicate();
+	if (screenDuplicate) {
+		printf("ScreenDuplicate\n");
+	} else {
+		printf("StateDuplicate\n");
+	}
 
 	printf("MinimalActionSet= %lu\n",
 			m_rom_settings->getMinimalActionSet().size());
@@ -247,10 +253,22 @@ bool SearchTree::test_duplicate(TreeNode *node) {
 					|| !sibling->is_initialized())
 				continue;
 
-			if (sibling->state.equals(node->state)) {
+			if (screenDuplicate) {
+				ALEState buff = m_env->cloneSystemState();
+				m_env->restoreState(sibling->state);
+				ALEScreen sibScreen = m_env->getScreen();
+				m_env->restoreState(node->state);
+				ALEScreen nodeScreen = m_env->getScreen();
+				if (sibScreen.equals(nodeScreen)) {
+					node->duplicate = true;
+					return true;
+				}
+			} else {
+				if (sibling->state.equals(node->state)) {
 
-				node->duplicate = true;
-				return true;
+					node->duplicate = true;
+					return true;
+				}
 			}
 		}
 

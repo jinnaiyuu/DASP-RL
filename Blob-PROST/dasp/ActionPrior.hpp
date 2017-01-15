@@ -14,6 +14,8 @@
 #endif
 #include "Dasp.hpp"
 #include "TriggerStrategy.hpp"
+#include "Prior.hpp"
+#include "SelectInitState.hpp"
 
 class ActionPrior {
 public:
@@ -25,8 +27,8 @@ public:
 			double reward); // TODO: what to put in as arguments?
 
 private:
-	std::vector<double> runPruning(ALEState initState, std::string strategy);
-	std::vector<double> runDasp(ALEState initState);
+//	std::vector<double> runPruning(ALEState initState, std::string strategy);
+//	std::vector<double> runDasp(ALEState initState);
 	bool needAdaptivePruning(double reward);
 	ALEState selectInitState(std::vector<ALEState> trajectory);
 
@@ -43,13 +45,19 @@ private:
 	std::string initStateStrategy;
 
 	// DASP/DASA parameters
-	Dasp* dasp;
+	Prior* initialPrior;
+	Prior* adaptivePrior;
 	int planning_episodes;
-	int steps_per_planning;
+	int init_steps_per_planning;
 	std::string search_method;
+
+	// Adaptive parameters
+	int adaptive_steps_per_planning;
 
 	// Trigger parameter
 	TriggerStrategy* trigger;
+
+	SelectInitState* initSelector;
 };
 
 #endif /* BLOB_PROST_DASP_ACTIONPRIOR_HPP_ */

@@ -263,6 +263,20 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName) {
 	}
 
 	//YJ
+	if (parameters.count("ACTION_SELECTION_STRATEGY") > 0) {
+		this->setActionSelectionStrategy(
+				parameters["ACTION_SELECTION_STRATEGY"].c_str());
+	} else {
+		this->setActionSelectionStrategy("EPSILON_GREEDY");
+	}
+
+	if (parameters.count("TEMPERATURE") > 0) {
+		this->setTemperature(
+				atof(parameters["TEMPERATURE"].c_str()));
+	} else {
+		this->setTemperature(1.0);
+	}
+
 //    if (minimalAction >= 2){
 	this->setUseActionPrior(atoi(parameters["USE_ACTION_PRIOR"].c_str()));
 
@@ -270,7 +284,8 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName) {
 		this->setInitialStrategy(parameters["INITIAL_STRATEGY"].c_str());
 		this->setAdaptiveStrategy(parameters["ADAPTIVE_STRATEGY"].c_str());
 		this->setTriggerStrategy(parameters["TRIGGER_STRATEGY"].c_str());
-		this->setInitStateStrategy(parameters["INITIAL_STATE_STRATEGY"].c_str());
+		this->setInitStateStrategy(
+				parameters["INITIAL_STATE_STRATEGY"].c_str());
 	}
 
 //	if (initialStrategy == "DASP" || adaptiveStrategy == "DASP") {
@@ -279,12 +294,26 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName) {
 	this->setSearchMethod(parameters["SEARCH_METHOD"]);
 	this->setDaspSequenceLength(
 			atoi(parameters["DASP_SEQUENCE_LENGTH"].c_str()));
+	this->setAdaptiveStepsPerPlanning(
+			atoi(parameters["ADAPTIVE_STEPS_PER_PLANNING"].c_str()));
+
+	if (parameters.count("SCREEN_DUPLICATE") > 0) {
+		this->setScreenDuplicate(atoi(parameters["SCREEN_DUPLICATE"].c_str()));
+	} else {
+		this->setScreenDuplicate(0);
+	}
+
+	// Parameters for trigger strategy
 	if (triggerStrategy == "EPISODE_COUNT") {
 		this->setEpisodeCount(atoi(parameters["EPISODE_COUNT"].c_str()));
 	}
-//	}
 
-//    }
+	// Parameters for select init state strategy
+	if (initStateStrategy == "BACK_COUNT") {
+		this->setBackCount(atoi(parameters["BACK_COUNT"].c_str()));
+		this->setRandomizeBackCount(
+				atoi(parameters["RANDOMIZE_BACK_COUNT"].c_str()));
+	}
 }
 
 void Parameters::setSaveTrajectoryPath(std::string name) {
@@ -680,4 +709,53 @@ int Parameters::getEpisodeCount() const {
 
 void Parameters::setEpisodeCount(int episodeCount) {
 	this->episodeCount = episodeCount;
+}
+
+int Parameters::getAdaptiveStepsPerPlanning() const {
+	return adaptive_steps_per_planning;
+}
+
+void Parameters::setAdaptiveStepsPerPlanning(int adaptiveStepsPerPlanning) {
+	adaptive_steps_per_planning = adaptiveStepsPerPlanning;
+}
+
+int Parameters::getRandomizeBackCount() const {
+	return randomizeBackCount;
+}
+
+void Parameters::setRandomizeBackCount(int randomizeBackCount) {
+	this->randomizeBackCount = randomizeBackCount;
+}
+
+int Parameters::getBackCount() const {
+	return backCount;
+}
+
+void Parameters::setBackCount(int backCount) {
+	this->backCount = backCount;
+}
+
+int Parameters::getScreenDuplicate() const {
+	return screenDuplicate;
+}
+
+void Parameters::setScreenDuplicate(int screenDuplicate) {
+	this->screenDuplicate = screenDuplicate;
+}
+
+const std::string& Parameters::getActionSelectionStrategy() const {
+	return actionSelectionStrategy;
+}
+
+void Parameters::setActionSelectionStrategy(
+		const std::string& actionSelectionStrategy) {
+	this->actionSelectionStrategy = actionSelectionStrategy;
+}
+
+float Parameters::getTemperature() const {
+	return temperature;
+}
+
+void Parameters::setTemperature(float temperature) {
+	this->temperature = temperature;
 }

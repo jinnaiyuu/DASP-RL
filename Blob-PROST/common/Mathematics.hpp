@@ -25,4 +25,8 @@ public:
         */
     static int argmax(std::vector<float> array);
     static int argmax(std::vector<float>array,std::mt19937* randAgent);
+
+    static int softmax(std::vector<float>array, float temperature, std::mt19937* randAgent);
+
+    static int chooseFromProbability(std::vector<float> array, std::mt19937* randAgent);
 };
