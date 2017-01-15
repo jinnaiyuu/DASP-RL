@@ -47,6 +47,7 @@ SearchTree::SearchTree(RomSettings * rom_settings, Settings & settings,
 	normalize_rewards = settings.getBool("normalize_rewards", false);
 	// Default: false
 	ignore_duplicates = settings.getBool("ignore_duplicates_nodes", false);
+//	ignore_duplicates = true;
 	m_env = _env;
 	m_randomize_successor = settings.getBool("randomize_successor_novelty",
 			false);
@@ -56,8 +57,9 @@ SearchTree::SearchTree(RomSettings * rom_settings, Settings & settings,
 	m_emulation_time = 0;
 	m_context_time = 0;
 
-	action_sequence_detection = settings.getBool("action_sequence_detection",
-			false);
+//	action_sequence_detection = settings.getBool("action_sequence_detection",
+//			false);
+	action_sequence_detection = param->getActionSequenceDetection();
 
 	if (action_sequence_detection) {
 		printf("RUNNING ACTION SEQUENCE DETECTION\n");
@@ -108,6 +110,7 @@ SearchTree::SearchTree(RomSettings * rom_settings, Settings & settings,
 void SearchTree::clear(void) {
 	if (p_root != NULL) {
 		delete_branch(p_root);
+//		delete p_root;
 		p_root = NULL;
 	}
 	is_built = false;
@@ -240,11 +243,13 @@ void SearchTree::delete_branch(TreeNode* node) {
 }
 
 bool SearchTree::test_duplicate(TreeNode *node) {
+	printf("test_duplicate\n");
 	if (node->p_parent == NULL)
 		return false;
 	else {
 		TreeNode * parent = node->p_parent;
 
+//		printf("child size =%d\n", parent->v_children.size());
 		// Compare each valid sibling with this one
 		for (size_t c = 0; c < parent->v_children.size(); c++) {
 			TreeNode * sibling = parent->v_children[c];
@@ -259,6 +264,7 @@ bool SearchTree::test_duplicate(TreeNode *node) {
 				ALEScreen sibScreen = m_env->getScreen();
 				m_env->restoreState(node->state);
 				ALEScreen nodeScreen = m_env->getScreen();
+				m_env->restoreSystemState(buff);
 				if (sibScreen.equals(nodeScreen)) {
 					node->duplicate = true;
 					return true;
@@ -520,4 +526,8 @@ const ALEScreen SearchTree::getScreen(ALEState& s) const {
 	ALEScreen screen = m_env->getScreen();
 	m_env->restoreState(restore);
 	return screen;
+}
+
+void SearchTree::set_max_sim_steps_per_frame(int steps) {
+	max_sim_steps_per_frame = steps;
 }

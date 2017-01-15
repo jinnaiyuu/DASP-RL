@@ -21,7 +21,7 @@ LDFLAGS := -lale -lz -lm
 
 
 OBS := bin/mainBlobTime.o bin/Mathematics.o bin/Timer.o bin/Memory.o bin/Parameters.o bin/Features.o bin/Background.o bin/BlobTimeFeatures.o bin/RLLearner.o bin/SarsaLearner.o
-DASPOBS := bin/Prior.o bin/Dasp.o bin/ActionSequenceDetection.o bin/bit_array.o bin/BreadthFirstSearch.o bin/IW1Search.o bin/PlayerAgent.o bin/SearchAgent.o bin/SearchTree.o bin/TreeNode.o bin/VertexCover.o
+DASPOBS := bin/Prior.o bin/Dasp.o bin/ActionSequenceDetection.o bin/bit_array.o bin/BreadthFirstSearch.o bin/IW1Search.o bin/UCTSearchTree.o bin/UCTTreeNode.o bin/PlayerAgent.o bin/SearchAgent.o bin/SearchTree.o bin/TreeNode.o bin/VertexCover.o
 TRGOBS := bin/TriggerStrategy.o bin/EpisodeCount.o
 SLTOBS := bin/SelectInitState.o bin/BackCount.o
 
@@ -73,7 +73,7 @@ bin/ActionPrior.o: $(DASPOBS) $(TRGOBS) $(SLTOBS) dasp/ActionPrior.o
 bin/Prior.o: dasp/Prior.cpp
 	$(CXX) $(FLAGS) -c dasp/Prior.cpp -o bin/Prior.o $(LIBS)
 
-bin/Dasp.o: dasp/Dasp.cpp
+bin/Dasp.o: dasp/Dasp.cpp dasp/Prior.cpp
 	$(CXX) $(FLAGS) -c dasp/Dasp.cpp -o bin/Dasp.o $(LIBS)
 
 bin/ActionSequenceDetection.o: dasp/ActionSequenceDetection.cpp
@@ -82,16 +82,22 @@ bin/ActionSequenceDetection.o: dasp/ActionSequenceDetection.cpp
 bin/bit_array.o: dasp/bit_array.cxx
 	$(CXX) $(FLAGS) -c dasp/bit_array.cxx -o bin/bit_array.o $(LIBS)
 
-bin/BreadthFirstSearch.o: dasp/BreadthFirstSearch.cpp
+bin/BreadthFirstSearch.o: dasp/BreadthFirstSearch.cpp dasp/SearchTree.cpp
 	$(CXX) $(FLAGS) -c dasp/BreadthFirstSearch.cpp -o bin/BreadthFirstSearch.o $(LIBS)
 
-bin/IW1Search.o: dasp/IW1Search.cpp
+bin/IW1Search.o: dasp/IW1Search.cpp dasp/SearchTree.cpp
 	$(CXX) $(FLAGS) -c dasp/IW1Search.cpp -o bin/IW1Search.o $(LIBS)
+
+bin/UCTSearchTree.o: dasp/UCTSearchTree.cpp dasp/SearchTree.cpp
+	$(CXX) $(FLAGS) -c dasp/UCTSearchTree.cpp -o bin/UCTSearchTree.o $(LIBS)
+
+bin/UCTTreeNode.o: dasp/UCTTreeNode.cpp dasp/TreeNode.cpp
+	$(CXX) $(FLAGS) -c dasp/UCTTreeNode.cpp -o bin/UCTTreeNode.o $(LIBS)
 
 bin/PlayerAgent.o: dasp/PlayerAgent.cpp
 	$(CXX) $(FLAGS) -c dasp/PlayerAgent.cpp -o bin/PlayerAgent.o $(LIBS)
 
-bin/SearchAgent.o: dasp/SearchAgent.cpp
+bin/SearchAgent.o: dasp/SearchAgent.cpp dasp/PlayerAgent.cpp
 	$(CXX) $(FLAGS) -c dasp/SearchAgent.cpp -o bin/SearchAgent.o $(LIBS)
 
 bin/SearchTree.o: dasp/SearchTree.cpp
@@ -107,14 +113,14 @@ bin/VertexCover.o: dasp/VertexCover.cpp
 bin/TriggerStrategy.o: dasp/TriggerStrategy.cpp
 	$(CXX) $(FLAGS) -c dasp/TriggerStrategy.cpp -o bin/TriggerStrategy.o $(LIBS)
 	
-bin/EpisodeCount.o: dasp/EpisodeCount.cpp
+bin/EpisodeCount.o: dasp/EpisodeCount.cpp dasp/TriggerStrategy.cpp
 	$(CXX) $(FLAGS) -c dasp/EpisodeCount.cpp -o bin/EpisodeCount.o $(LIBS)
 
 ### SLTOBS: Select init state strategy
 bin/SelectInitState.o: dasp/SelectInitState.cpp
 	$(CXX) $(FLAGS) -c dasp/SelectInitState.cpp -o bin/SelectInitState.o $(LIBS)
 
-bin/BackCount.o: dasp/BackCount.cpp
+bin/BackCount.o: dasp/BackCount.cpp dasp/SelectInitState.cpp
 	$(CXX) $(FLAGS) -c dasp/BackCount.cpp -o bin/BackCount.o $(LIBS)
 
 

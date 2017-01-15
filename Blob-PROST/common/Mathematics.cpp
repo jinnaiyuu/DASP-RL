@@ -91,11 +91,11 @@ int Mathematics::chooseFromProbability(std::vector<float> array,
 	std::uniform_real_distribution<double> unif(0, sumOfWeights);
 	double rand = unif(*randAgent);
 
-	printf("sum=%.1f, rand=%.1f\n", sumOfWeights, rand);
+	//	printf("sum=%.1f, rand=%.1f\n", sumOfWeights, rand);
 	double accum = 0.0;
 	for (int i = 0; i < array.size(); ++i) {
 		accum += array[i];
-		printf("accum=%.1f, array[%d]=%.1f\n", accum, i, array[i]);
+		//		printf("accum=%.1f, array[%d]=%.1f\n", accum, i, array[i]);
 		if (rand <= accum) {
 			return i;
 		}

@@ -40,12 +40,13 @@ std::vector<std::vector<bool>> Dasp::getMinimalActionSequenceSet(
 }
 
 void Dasp::run(int planning_episodes, int frames, ALEState initState) {
-	ALEState restore_state = m_env->cloneState();
+	ALEState restore_state = m_env->cloneSystemState();
 	printf("frames=%d\n", frames);
-	search_agent->set_sim_steps_per_node(frames);
+	search_agent->rebuildTree();
+	search_agent->set_max_sim_steps_per_frame(frames);
 	m_env->setState(initState);
 	Action act = search_agent->agent_step();
-	m_env->restoreState(restore_state);
+	m_env->restoreSystemState(restore_state);
 }
 
 std::vector<double> Dasp::getPrior(ALEState initState, int steps_per_planning) {

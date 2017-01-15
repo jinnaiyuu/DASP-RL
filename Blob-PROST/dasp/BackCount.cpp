@@ -22,6 +22,7 @@ ALEState BackCount::getInitState(std::vector<ALEState> trajectory) {
 		return trajectory[r];
 	} else {
 		if (trajectory.size() < backSteps) {
+			printf("Initial State is used\n");
 			return trajectory[0];
 		} else {
 			return trajectory[trajectory.size() - 10];

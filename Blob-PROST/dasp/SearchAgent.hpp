@@ -26,48 +26,57 @@
 //#include "../common/Parameters.hpp"
 class Parameters;
 
-class SearchAgent : public PlayerAgent {
-    public:
-	SearchAgent(OSystem * _osystem, RomSettings * _settings, StellaEnvironment* _env, bool player_B = false, Parameters* param = nullptr);
-        virtual ~SearchAgent();
-		
-        /* *********************************************************************
-            This method is called when the game ends. 
-         ******************************************************************** */
-        virtual void episode_end(void);
-        
-        virtual Action episode_start(void);
+class SearchAgent: public PlayerAgent {
+public:
+	SearchAgent(OSystem * _osystem, RomSettings * _settings,
+			StellaEnvironment* _env, bool player_B = false, Parameters* param =
+					nullptr);
+	virtual ~SearchAgent();
 
-        virtual Action agent_step();
+	/* *********************************************************************
+	 This method is called when the game ends.
+	 ******************************************************************** */
+	virtual void episode_end(void);
 
-        void saveUsedAction(int frame_number, Action action);
+	virtual Action episode_start(void);
 
-        std::vector<std::vector<bool>> getUsefulActionSequenceSet();
+	virtual Action agent_step();
 
-        void set_sim_steps_per_node(int sim_steps);
+	void saveUsedAction(int frame_number, Action action);
 
-	protected:
-        /* *********************************************************************
-            Returns the best action from the set of possible actions
-         ******************************************************************** */
-        virtual Action act();
-        
-        int num_available_actions();
-        ActionVect &get_available_actions();
+	std::vector<std::vector<bool>> getUsefulActionSequenceSet();
 
-	void set_search_tree_player_B( bool b ){ if(search_tree) search_tree->set_player_B(b); }
+	void set_max_sim_steps_per_frame(int sim_steps);
+	void rebuildTree();
+
+protected:
+	/* *********************************************************************
+	 Returns the best action from the set of possible actions
+	 ******************************************************************** */
+	virtual Action act();
+
+	int num_available_actions();
+	ActionVect &get_available_actions();
+
+	void set_search_tree_player_B(bool b) {
+		if (search_tree)
+			search_tree->set_player_B(b);
+	}
 protected:
 	Action m_curr_action;
 	ALEState state;
 	RomSettings * m_rom_settings;
 	SearchTree * search_tree;
 	StellaEnvironment* m_env;
+	Parameters* m_param;
 	int sim_steps_per_node;
-	
+
 	std::string search_method;
 	unsigned m_current_episode;
 	std::ofstream m_trace;
 
+private:
+	int max_sim_steps_per_frame;
 };
 
 #endif // __SEARCH_AGENT_HPP__

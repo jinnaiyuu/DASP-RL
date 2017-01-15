@@ -262,6 +262,14 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName) {
 		this->setNoOpMax(0);
 	}
 
+	// YJ: Legacy DASP parameters:
+	if (parameters.count("ACTION_SEQUENCE_DETECTION") > 0) {
+		this->setActionSequenceDetection(
+					atoi(parameters["ACTION_SEQUENCE_DETECTION"].c_str()));
+	} else {
+		this->setActionSequenceDetection(1);
+	}
+
 	//YJ
 	if (parameters.count("ACTION_SELECTION_STRATEGY") > 0) {
 		this->setActionSelectionStrategy(
@@ -271,8 +279,7 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName) {
 	}
 
 	if (parameters.count("TEMPERATURE") > 0) {
-		this->setTemperature(
-				atof(parameters["TEMPERATURE"].c_str()));
+		this->setTemperature(atof(parameters["TEMPERATURE"].c_str()));
 	} else {
 		this->setTemperature(1.0);
 	}
@@ -296,6 +303,15 @@ void Parameters::parseParametersFromConfigFile(std::string cfgFileName) {
 			atoi(parameters["DASP_SEQUENCE_LENGTH"].c_str()));
 	this->setAdaptiveStepsPerPlanning(
 			atoi(parameters["ADAPTIVE_STEPS_PER_PLANNING"].c_str()));
+
+	// UCT params
+	if (search_method == "uct") {
+		this->setUctMaxSimulations(
+				atoi(parameters["UCT_MAX_SIMULATIONS"].c_str()));
+		this->setUctSearchDepth(atoi(parameters["UCT_SEARCH_DEPTH"].c_str()));
+		this->setUctExplorationConstant(
+				atof(parameters["UCT_EXPLORATION_CONSTANT"].c_str()));
+	}
 
 	if (parameters.count("SCREEN_DUPLICATE") > 0) {
 		this->setScreenDuplicate(atoi(parameters["SCREEN_DUPLICATE"].c_str()));
@@ -758,4 +774,36 @@ float Parameters::getTemperature() const {
 
 void Parameters::setTemperature(float temperature) {
 	this->temperature = temperature;
+}
+
+float Parameters::getUctExplorationConstant() const {
+	return uctExplorationConstant;
+}
+
+void Parameters::setUctExplorationConstant(float uctExplorationConstant) {
+	this->uctExplorationConstant = uctExplorationConstant;
+}
+
+int Parameters::getUctSearchDepth() const {
+	return uctSearchDepth;
+}
+
+void Parameters::setUctSearchDepth(int uctSearchDepth) {
+	this->uctSearchDepth = uctSearchDepth;
+}
+
+int Parameters::getUctMaxSimulations() const {
+	return uctMaxSimulations;
+}
+
+void Parameters::setUctMaxSimulations(int uctMaxSimulations) {
+	this->uctMaxSimulations = uctMaxSimulations;
+}
+
+int Parameters::getActionSequenceDetection() const {
+	return actionSequenceDetection;
+}
+
+void Parameters::setActionSequenceDetection(int actionSequenceDetection) {
+	this->actionSequenceDetection = actionSequenceDetection;
 }

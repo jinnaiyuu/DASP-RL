@@ -23,12 +23,11 @@
 
 #include "BreadthFirstSearch.hpp"
 #include "IW1Search.hpp"
+#include "UCTSearchTree.hpp"
 //#include "PIW1Search.hpp"
-
 //#include "UniformCostSearch.hpp"
 //#include "BestFirstSearch.hpp"
 
-//#include "UCTSearchTree.hpp"
 #include "../../src/common/time.hxx"
 #include "../common/Parameters.hpp"
 //#include "Priorities.hpp"
@@ -46,7 +45,7 @@ SearchAgent::SearchAgent(OSystem* _osystem, RomSettings* _settings,
 //				false);
 //	}
 
-	// Depending on the configuration, create a SearchTree of the requested type
+// Depending on the configuration, create a SearchTree of the requested type
 	if (search_method == "brfs") {
 		search_tree = new BreadthFirstSearch(_settings, _osystem->settings(),
 				available_actions, _env, param);
@@ -78,10 +77,10 @@ SearchAgent::SearchAgent(OSystem* _osystem, RomSettings* _settings,
 //		search_tree->set_novelty_pruning();
 //		m_trace.open("bfs.search-agent.trace");
 //
-//	} else if (search_method == "uct") {
-//		search_tree = new UCTSearchTree(_settings, _osystem->settings(),
-//				available_actions, _env);
-//		m_trace.open("uct.search-agent.trace");
+	} else if (search_method == "uct") {
+		search_tree = new UCTSearchTree(_settings, _osystem->settings(),
+				available_actions, _env, param);
+		m_trace.open("uct.search-agent.trace");
 	} else {
 		std::cerr << "Unknown search Method: " << search_method << std::endl;
 		exit(-1);
@@ -94,6 +93,8 @@ SearchAgent::SearchAgent(OSystem* _osystem, RomSettings* _settings,
 	Settings &settings = _osystem->settings();
 	sim_steps_per_node = settings.getInt("sim_steps_per_node", true);
 //	sim_steps_per_node
+
+	m_param = param;
 }
 
 SearchAgent::~SearchAgent() {
@@ -121,12 +122,16 @@ Action SearchAgent::agent_step() {
  Returns a random action from the set of possible actions
  ******************************************************************** */
 Action SearchAgent::act() {
+//	rebuildTree();
 	// Generate a new action every sim_steps_per node; otherwise return the
 	//  current selected action 
 
 	// should be NO_OP, otherwise it sends best action every frame for sim_steps_frames!!!!
-	if (frame_number % sim_steps_per_node != 0)
+	if (frame_number % sim_steps_per_node != 0) {
+		std::cout << "FRAMENUMBER SOMETHING WRONG" << frame_number << ","
+				<< sim_steps_per_node << std::endl;
 		return m_curr_action;
+	}
 
 	std::cout << "Search Agent action selection: frame=" << frame_number
 			<< std::endl;
@@ -134,30 +139,34 @@ Action SearchAgent::act() {
 			<< m_rom_settings->isTerminal() << std::endl;
 	std::cout << "Evaluating actions: " << std::endl;
 
+	search_tree->set_max_sim_steps_per_frame(max_sim_steps_per_frame);
+
 	float t0 = aptk::time_used();
 
 	state = m_env->cloneState();
 
-	if (search_tree->is_built) {
-		// Re-use the old tree
-		search_tree->move_to_best_sub_branch();
-		//assert(search_tree->get_root()->state.equals(state));
-		if (search_tree->get_root()->state.equals(state)) {
-			//assert(search_tree->get_root()->state.equals(state));
-			//assert (search_tree->get_root_frame_number() == state.getFrameNumber());
-			search_tree->update_tree();
+	search_tree->clear();
+	search_tree->build(state);
 
-		} else {
-			//std::cout << "\n\n\tDIFFERENT STATE!\n" << std::endl;
-			search_tree->clear();
-			search_tree->build(state);
-		}
-	} else {
-		// Build a new Search-Tree
-		search_tree->clear();
-		search_tree->build(state);
-	}
-
+//	if (search_tree->is_built) {
+//		// Re-use the old tree
+//		search_tree->move_to_best_sub_branch();
+//		//assert(search_tree->get_root()->state.equals(state));
+//		if (search_tree->get_root()->state.equals(state)) {
+//			//assert(search_tree->get_root()->state.equals(state));
+//			//assert (search_tree->get_root_frame_number() == state.getFrameNumber());
+//			search_tree->update_tree();
+//
+//		} else {
+//			//std::cout << "\n\n\tDIFFERENT STATE!\n" << std::endl;
+//			search_tree->clear();
+//			search_tree->build(state);
+//		}
+//	} else {
+//		// Build a new Search-Tree
+//		search_tree->clear();
+//		search_tree->build(state);
+//	}
 
 	m_curr_action = search_tree->get_best_action();
 
@@ -177,7 +186,6 @@ Action SearchAgent::act() {
 			m_trace);
 	search_tree->print_frame_data(frame_number, elapsed, m_curr_action,
 			std::cout);
-
 
 	return m_curr_action;
 }
@@ -205,7 +213,35 @@ std::vector<std::vector<bool>> SearchAgent::getUsefulActionSequenceSet() {
 	return search_tree->getUsefulActionSequenceSet();
 }
 
+void SearchAgent::set_max_sim_steps_per_frame(int sim_steps) {
+	max_sim_steps_per_frame = sim_steps;
+}
 
-void SearchAgent::set_sim_steps_per_node(int sim_steps) {
-	sim_steps_per_node = sim_steps;
+void SearchAgent::rebuildTree() {
+	if (search_tree == nullptr) {
+		return;
+	}
+	delete search_tree;
+	frame_number = 0;
+
+	if (search_method == "brfs") {
+		search_tree = new BreadthFirstSearch(m_rom_settings, p_osystem->settings(),
+				available_actions, m_env, m_param);
+		m_trace.open("brfs.search-agent.trace");
+	} else if (search_method == "iw1") {
+		search_tree = new IW1Search(m_rom_settings, p_osystem->settings(),
+				available_actions, m_env, m_param);
+		search_tree->set_novelty_pruning();
+		m_trace.open("iw1.search-agent.trace");
+
+	} else if (search_method == "uct") {
+		search_tree = new UCTSearchTree(m_rom_settings, p_osystem->settings(),
+				available_actions, m_env, m_param);
+		m_trace.open("uct.search-agent.trace");
+	} else {
+		std::cerr << "Unknown search Method: " << search_method << std::endl;
+		exit(-1);
+	}
+
+	search_tree->set_player_B(false);
 }

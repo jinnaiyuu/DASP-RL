@@ -60,6 +60,7 @@ private:
     int randomNoOp;
     int noOpMax;
     
+    int actionSequenceDetection;
     // YJ: RL methods
     std::string actionSelectionStrategy;
 
@@ -78,6 +79,11 @@ private:
     int dasp_sequence_length;
     std::string search_method;
     int screenDuplicate;
+
+    // YJ: DASP/Monte Carlo Tree Search
+    int uctMaxSimulations;
+    int uctSearchDepth;
+    float uctExplorationConstant;
 
     // YJ adaptive strategy
     int adaptive_steps_per_planning;
@@ -448,4 +454,12 @@ public:
 	void setActionSelectionStrategy(const std::string& actionSelectionStrategy);
 	float getTemperature() const;
 	void setTemperature(float temperature);
+	float getUctExplorationConstant() const;
+	void setUctExplorationConstant(float uctExplorationConstant);
+	int getUctSearchDepth() const;
+	void setUctSearchDepth(int uctSearchDepth);
+	int getUctMaxSimulations() const;
+	void setUctMaxSimulations(int uctMaxSimulations);
+	int getActionSequenceDetection() const;
+	void setActionSequenceDetection(int actionSequenceDetection);
 };

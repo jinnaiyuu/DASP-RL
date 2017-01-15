@@ -60,9 +60,10 @@ ActionPrior::~ActionPrior() {
 }
 
 std::vector<double> ActionPrior::initialPruning() {
-	ALEState initState = ale.cloneState();
+	ALEState initState = ale.cloneSystemState();
 //	return runPruning(initState, initialStrategy);
 	currentPrior = initialPrior->getPrior(initState, init_steps_per_planning);
+	ale.restoreSystemState(initState);
 	return currentPrior;
 }
 
@@ -101,6 +102,8 @@ std::vector<double> ActionPrior::initialPruning() {
 
 std::vector<double> ActionPrior::adaptivePruning(
 		std::vector<ALEState> trajectory, double reward) {
+	ALEState buff = ale.cloneSystemState();
+	ale.reset_game();
 	if (!needAdaptivePruning(reward)) {
 		printf("not triggered\n");
 		return currentPrior;
@@ -108,7 +111,7 @@ std::vector<double> ActionPrior::adaptivePruning(
 	printf("triggered\n");
 
 	ALEState initState = selectInitState(trajectory);
-	printf("selected initState: %d frame\n", initState.getEpisodeFrameNumber());
+	printf("selected initState: %d frame\n", initState.getFrameNumber());
 
 	std::vector<double> prior = adaptivePrior->getPrior(initState,
 			adaptive_steps_per_planning);
@@ -121,6 +124,8 @@ std::vector<double> ActionPrior::adaptivePruning(
 		}
 	}
 	currentPrior = prior;
+	ale.restoreSystemState(buff);
+//	ale.reset_game();
 	return currentPrior;
 }
 

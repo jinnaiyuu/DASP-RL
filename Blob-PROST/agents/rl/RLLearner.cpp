@@ -17,6 +17,7 @@ RLLearner::RLLearner(ALEInterface& ale, Parameters *param, int seed) {
 	randomActionTaken = 0;
 
 	actionSelectionStrategy = param->getActionSelectionStrategy();
+	printf("actionSelectionStrategy = %s\n", actionSelectionStrategy.c_str());
 
 	gamma = param->getGamma();
 	finalEpsilon = param->getEpsilon();
